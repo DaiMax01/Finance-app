@@ -1,0 +1,18 @@
+services:
+  financeapi:
+    build:
+      context: ./finance_app
+      dockerfile: Dockerfile
+    container_name: finance-api
+    env_file:
+      - ./finance_app/.env  # Asegúrate de que esta ruta apunte a un archivo .env real
+    ports:
+      - "8000:8000"
+
+  financefrontend:
+    build:
+      context: ./finance_frontend/finance-frontend
+      dockerfile: Dockerfile
+    container_name: finance-frontend
+    ports:
+      - "5173:5173"
