@@ -14,7 +14,7 @@ urlpatterns = [
     path('saving-goals/<int:pk>',SavingPlanDetail.as_view()),
     path('users/', UserListCreateView.as_view(), name='user-create'),
     path('bank-account/',BankAccountListCreateView.as_view()),
-    path('bank-account/<int:pk>', BankAccountDetailView.as_view())
+    path('bank-account/<int:pk>/', BankAccountDetailView.as_view())
     
     
 ]

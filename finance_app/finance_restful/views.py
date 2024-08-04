@@ -10,6 +10,7 @@ from django.http import JsonResponse
 from decimal import Decimal
 from .pagination import * 
 from rest_framework.permissions import AllowAny
+from django.utils.dateparse import parse_date
 
 class TransactionList(generics.ListCreateAPIView):
     queryset = Transactions.objects.all()
@@ -18,8 +19,14 @@ class TransactionList(generics.ListCreateAPIView):
     permission_classes = [AllowAny]
     def get_queryset(self):
         queryset = Transactions.objects.all().order_by('-transaction_date')
+        start_date = self.request.query_params.get('start_date')
+        end_date = self.request.query_params.get('end_date')
         
-        # Filtering based on query parameter
+        if start_date:
+            queryset = queryset.filter(transaction_date__date__gte=parse_date(start_date))
+        
+        if end_date:
+            queryset = queryset.filter(transaction_date__date__lte=parse_date(end_date))
         
         return queryset
     

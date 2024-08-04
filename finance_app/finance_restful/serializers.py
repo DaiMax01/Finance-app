@@ -45,12 +45,24 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 class SavingGoalSerializer(serializers.ModelSerializer):
+    bank_account_balance = serializers.SerializerMethodField()
+
     class Meta:
         model = SavingGoals
-        fields='__all__'
+        fields = '__all__'
+
+    def get_bank_account_balance(self, obj):
+        return obj.bank_account.current_balance
 
 class BankAccountSerializer(serializers.ModelSerializer):
-    
+    account_type_display = serializers.SerializerMethodField()
+
     class Meta:
         model = BankAccount
-        fields='__all__'
+        fields = '__all__'
+        read_only_fields = ['amount']
+
+    def get_account_type_display(self, obj):
+        # Devuelve la representación legible del account_type
+        account_types = dict(BankAccount.ACCOUNT_TYPES)  # Convertir a diccionario para búsqueda
+        return account_types.get(obj.account_type, 'Unknown')

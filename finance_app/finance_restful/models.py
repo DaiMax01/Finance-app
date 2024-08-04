@@ -5,11 +5,8 @@ from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 # Create your models here.
 
-transaction_choices =((1,"Deposit"),
-                      (2,"Withdrawal"))
-
-account_types =((2,"Saving Account"),
-                (1,"Main Account"))
+transaction_choices =((1,"Credit"),
+                      (2,"Debit"))
 
 is_active = (
     (0, 'INACTIVE'),
@@ -18,9 +15,12 @@ is_active = (
 
 
 class BankAccount(models.Model):
-    current_balance = models.DecimalField(max_digits=20, decimal_places=8,null=True)
+    ACCOUNT_TYPES =((3,"Business Account"),
+                 (2,"Saving Account"),
+                (1,"Main Account"))
+    current_balance = models.DecimalField(default=0,max_digits=20, decimal_places=8,null=True)
     description=models.CharField(null=True)
-    account_type=models.IntegerField(choices=account_types, null=True)
+    account_type=models.IntegerField(choices=ACCOUNT_TYPES, null=True)
     account_code = models.CharField(max_length=4, null=True)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.DO_NOTHING, null=True)
     
