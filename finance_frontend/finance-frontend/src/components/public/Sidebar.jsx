@@ -1,9 +1,9 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
-import { Link } from 'react-router-dom';
 import Drawer from '@mui/material/Drawer';
-import AppBar from '@mui/material/AppBar';
 import CssBaseline from '@mui/material/CssBaseline';
+import AppBar from '@mui/material/AppBar';
+import { Link } from 'react-router-dom';
 import Toolbar from '@mui/material/Toolbar';
 import List from '@mui/material/List';
 import Typography from '@mui/material/Typography';
@@ -15,13 +15,16 @@ import ListItemText from '@mui/material/ListItemText';
 import InboxIcon from '@mui/icons-material/MoveToInbox';
 import MailIcon from '@mui/icons-material/Mail';
 
-const drawerWidth = 240;
+const drawerWidth = 210;
 
-export default function Sidebar({children}) {
+export default function PermanentDrawerLeft({children}) {
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
-      <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+      <AppBar
+        position="fixed"
+        sx={{ width: `calc(100% - ${drawerWidth}px)`, ml: `${drawerWidth}px` }}
+      >
         <Toolbar>
           <Typography variant="h6" noWrap component="div">
             Finance-app
@@ -29,16 +32,20 @@ export default function Sidebar({children}) {
         </Toolbar>
       </AppBar>
       <Drawer
-        variant="permanent"
         sx={{
           width: drawerWidth,
           flexShrink: 0,
-          [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box' },
+          '& .MuiDrawer-paper': {
+            width: drawerWidth,
+            boxSizing: 'border-box',
+          },
         }}
+        variant="permanent"
+        anchor="left"
       >
         <Toolbar />
-        <Box sx={{ overflow: 'auto' }}>
-          <List>
+        <Divider />
+        <List>
           <ListItem disablePadding>
               <Link to="" style={{ textDecoration: 'none', color: 'inherit', width: '100%' }}>
                 <ListItemButton sx={{ width: '100%' }}>
@@ -69,23 +76,23 @@ export default function Sidebar({children}) {
                 </ListItemButton>
               </Link>
             </ListItem>
-          </List>
-          <Divider />
-          <List>
-            {['All mail', 'Trash', 'Spam'].map((text, index) => (
-              <ListItem key={text} disablePadding>
+            <ListItem disablePadding>
+              <Link to="bank-accounts/" style={{ textDecoration: 'none', color: 'inherit', width: '100%' }}>
                 <ListItemButton sx={{ width: '100%' }}>
                   <ListItemIcon>
-                    {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+                    <InboxIcon />
                   </ListItemIcon>
-                  <ListItemText primary={text} />
+                  <ListItemText primary="Accounts" />
                 </ListItemButton>
-              </ListItem>
-            ))}
+              </Link>
+            </ListItem>
           </List>
-        </Box>
       </Drawer>
-      <Box component="main" sx={{ marginTop: 6, flexGrow: 1, p: 3 }}>
+      <Box
+        component="main"
+        sx={{ flexGrow: 1, p: 3}}
+      >
+        <Toolbar />
         {children}
       </Box>
     </Box>

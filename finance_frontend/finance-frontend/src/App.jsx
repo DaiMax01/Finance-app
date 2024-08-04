@@ -5,6 +5,7 @@ import Sidebar from './components/public/Sidebar';
 import UserList from './components/UserList';
 import TransactionList from './components/TransactionList';
 import SavingplanList from './components/SavingplanList';
+import BankaccountList from './components/BankaccountList'
 
 
 export default function App() {
@@ -15,7 +16,8 @@ export default function App() {
           <Routes>
             <Route path="/users" Component={UserList}/>
             <Route path="/transactions" Component={TransactionList}/>
-            <Route path="/saving-plans" Component={SavingplanList}></Route>
+            <Route path="/saving-plans" Component={SavingplanList}/>
+            <Route path="/bank-accounts" Component={BankaccountList}/>
           </Routes> 
       </Sidebar>
       </Router>
