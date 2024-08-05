@@ -36,7 +36,7 @@ const TransactionCard = ({ transaction }) => {
           Date: {transaction_date}
         </Typography>
         <Typography variant="body2" color="textSecondary">
-          Type of transaction: {type_of_transaction === 1 ? `Deposit` : `Withdrawal`}
+          Type of transaction: {type_of_transaction === 1 ? `Credit` : `Debit`}
         </Typography>
         <Typography variant="body2">
           Description: {description}

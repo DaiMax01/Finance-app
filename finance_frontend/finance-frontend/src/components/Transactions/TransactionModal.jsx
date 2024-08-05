@@ -34,22 +34,25 @@ const TransactionModal = ({ open, handleClose, addTransaction }) => {
   }, [open]);
 
   useEffect(() => {
-    if (open) {
+    if (open && typeOfTransaction) {
       const fetchTransactionCategories = async () => {
-        setLoading(true);
+
         try {
-          const response = await axiosInstance.get('transaction-type/');
+          const response = await axiosInstance.get('transaction-type/', {
+            params: { transaction_type: typeOfTransaction },
+          });
           setTransactionCategories(response.data);
         } catch (error) {
           console.error('Error fetching categories:', error);
           setError('Failed to fetch transaction categories');
-        } finally {
-          setLoading(false);
-        }
+        } 
       };
       fetchTransactionCategories();
+    } else {
+      setTransactionCategories([]);
+      setTransactionCategory('');
     }
-  }, [open]);
+  }, [open, typeOfTransaction]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -60,7 +63,7 @@ const TransactionModal = ({ open, handleClose, addTransaction }) => {
         type_of_transaction: typeOfTransaction,
         description,
         bank_account: bankAccount,
-        transaction_category: transactionCategory // Make sure this field is included
+        transaction_category: transactionCategory, // Make sure this field is included
       });
       console.log('Transaction added:', response.data);
 
