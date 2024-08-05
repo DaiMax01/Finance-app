@@ -26,7 +26,10 @@ class BankAccount(models.Model):
     
 
 class TransactionTypes(models.Model):
+    ACCOUNT_TYPES =((1,"Credit"),
+                      (2,"Debit"))
     code = models.CharField(max_length=4)
+    type = models.IntegerField(choices=transaction_choices, null=True)
     description = models.CharField(max_length=200)
     
 class Transactions(models.Model):
