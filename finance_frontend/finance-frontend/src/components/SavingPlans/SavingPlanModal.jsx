@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Select, MenuItem, Button, FormControl, InputLabel, Box, CircularProgress } from '@mui/material';
 import axiosInstance from '../../axiosConfig'; // Adjust the path as needed
 
-const SavingGoalModal = ({ open, handleClose, addSavingGoal }) => {
+const SavingGoalModal = ({ handleReload, open, handleClose, addSavingGoal, handleEdit, isEdit, savingGoalId }) => {
   const [code, setCode] = useState('');
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
@@ -43,29 +43,80 @@ const SavingGoalModal = ({ open, handleClose, addSavingGoal }) => {
 
       fetchBankAccounts();
       fetchSavingTypes();
+
+      if (isEdit && savingGoalId) {
+        const fetchSavingGoal = async () => {
+          setLoading(true);
+          try {
+            const response = await axiosInstance.get(`saving-goals/${savingGoalId}`);
+            const { code, amount, description, bank_account, saving_type } = response.data;
+            setCode(code);
+            setAmount(amount);
+            setDescription(description);
+            setBankAccount(bank_account);
+            setSavingType(saving_type);
+          } catch (error) {
+            console.error('Error fetching saving goal:', error);
+            setError('Failed to fetch saving goal.');
+          } finally {
+            setLoading(false);
+          }
+        };
+
+        fetchSavingGoal();
+      } else {
+        // Clear fields when adding new saving goal
+        setCode('');
+        setAmount('');
+        setDescription('');
+        setBankAccount('');
+        setSavingType('');
+      }
     }
-  }, [open]);
+  }, [open, isEdit, savingGoalId]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    // Perform validations
+    if (amount < 0) {
+      setError('Amount cannot be negative.');
+      return;
+    }
+
+    if (!/^\d{1,4}$/.test(code)) {
+      setError('Code must be a number with a maximum of 4 digits.');
+      return;
+    }
+
     setLoading(true);
     try {
-      const response = await axiosInstance.post('saving-goals/', {
-        code,
-        amount,
-        description,
-        bank_account: bankAccount,
-        saving_type: savingType,
-      });
-      console.log('Saving goal added:', response.data);
-
-      // Call addSavingGoal from props to update the list
-      addSavingGoal(response.data);
-
+      if (isEdit && savingGoalId) {
+        const response = await axiosInstance.put(`saving-goals/${savingGoalId}`, {
+          code,
+          amount,
+          description,
+          bank_account: bankAccount,
+          saving_type: savingType,
+        });
+        console.log('Saving goal updated:', response.data);
+        handleReload(true);
+        handleEdit(response.data);
+      } else {
+        const response = await axiosInstance.post('saving-goals/', {
+          code,
+          amount,
+          description,
+          bank_account: bankAccount,
+          saving_type: savingType,
+        });
+        console.log('Saving goal added:', response.data);
+        addSavingGoal(response.data);
+      }
       handleClose(); // Close the modal on success
     } catch (error) {
-      console.error('Error adding saving goal:', error);
-      setError('Failed to add saving goal.');
+      console.error('Error saving saving goal:', error);
+      setError('Failed to save saving goal.');
     } finally {
       setLoading(false);
     }
@@ -73,7 +124,7 @@ const SavingGoalModal = ({ open, handleClose, addSavingGoal }) => {
 
   return (
     <Dialog open={open} onClose={handleClose}>
-      <DialogTitle>Register Saving Goal</DialogTitle>
+      <DialogTitle>{isEdit ? 'Edit Saving Goal' : 'Register Saving Goal'}</DialogTitle>
       <DialogContent>
         <Box sx={{ width: '100%', maxWidth: 600 }}>
           {loading ? (
@@ -90,9 +141,12 @@ const SavingGoalModal = ({ open, handleClose, addSavingGoal }) => {
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
                 required
+                inputProps={{ pattern: "\\d{1,4}" }}
+                error={!/^\d{1,4}$/.test(code)}
+                helperText="Code must be a number with a maximum of 4 digits."
               />
               <TextField
-                label="Amount"
+                label="Goal Amount"
                 variant="outlined"
                 fullWidth
                 margin="normal"
@@ -100,9 +154,11 @@ const SavingGoalModal = ({ open, handleClose, addSavingGoal }) => {
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 required
+                error={amount <= 0}
+                helperText={amount <= 0 ? "Amount cannot be negative nor zero." : ""}
               />
               <TextField
-                label="Description"
+                label="Title"
                 variant="outlined"
                 fullWidth
                 margin="normal"
@@ -141,7 +197,7 @@ const SavingGoalModal = ({ open, handleClose, addSavingGoal }) => {
               {error && <p style={{ color: 'red' }}>{error}</p>}
               <DialogActions>
                 <Button type="submit" variant="contained" color="primary" disabled={loading}>
-                  {loading ? 'Adding...' : 'Add'}
+                  {loading ? 'Saving...' : (isEdit ? 'Save' : 'Add')}
                 </Button>
                 <Button onClick={handleClose} color="secondary" disabled={loading}>
                   Cancel

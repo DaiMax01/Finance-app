@@ -8,52 +8,46 @@ const accountTypes = [
   { value: 1, label: "Main Account" },
 ];
 
-const EditModalForm = ({ open, handleClose, selectedBankAccount, onReloadData,isEdit }) => {
+const EditModalForm = ({ open, handleClose, selectedSavingType, onReloadData,isEdit }) => {
   const [description, setDescription] = useState('');
-  const [accountCode, setAccountCode] = useState('');
-  const [accountType, setAccountType] = useState('');
+  const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (isEdit && selectedBankAccount) {
-      setDescription(selectedBankAccount.description || '');
-      setAccountCode(selectedBankAccount.account_code || '');
-      setAccountType(selectedBankAccount.account_type || '');
+    if (isEdit && selectedSavingType) {
+      setDescription(selectedSavingType.description || '');
+      setCode(selectedSavingType.code || '');
     }
     else{
       setDescription('');
-      setAccountCode('');
-      setAccountType('');
+      setCode('');
     }
 
-  }, [selectedBankAccount]);
+  }, [selectedSavingType]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
     try {
         if (isEdit) {
-            await axiosInstance.put(`bank-account/${selectedBankAccount.id}/`, {
+            await axiosInstance.put(`saving-types/${selectedSavingType.id}/`, {
               description,
-              account_code: accountCode,
-              account_type: accountType,
+              code: code,
             });
           } else {
-            await axiosInstance.post(`bank-account/`, {
+            await axiosInstance.post(`saving-types/`, {
               description,
-              account_code: accountCode,
-              account_type: accountType,
+              code: code,
             });
           }
         onReloadData();
         handleClose(); // Close modal on success
         setDescription('');
-        setAccountCode('');
-        setAccountType('');
+        setCode('');
     } catch (error) {
-        setError(isEdit ? 'Failed to update bank account.' : 'Failed to create bank account.');
-        console.error('Error saving bank account:', error);
+        setError(isEdit ? 'Failed to update Saving Type' : 'Failed to create Saving Type');
+        console.error('Error saving Saving Type:', error);
     } finally {
       setLoading(false);
     }
@@ -61,7 +55,7 @@ const EditModalForm = ({ open, handleClose, selectedBankAccount, onReloadData,is
 
   return (
     <Dialog open={open} onClose={handleClose}>
-      <DialogTitle>Bank Account Information</DialogTitle>
+      <DialogTitle>Saving Type Information</DialogTitle>
       <DialogContent>
         {loading ? (
           <CircularProgress />
@@ -76,28 +70,17 @@ const EditModalForm = ({ open, handleClose, selectedBankAccount, onReloadData,is
               required
             />
             <TextField
-              label="Account Code"
+              label="Code"
+              variant="outlined"
               fullWidth
               margin="normal"
-              value={accountCode}
-              onChange={(e) => setAccountCode(e.target.value)}
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
               required
+              inputProps={{ pattern: "\\d{1,4}" }}
+              error={!/^\d{1,4}$/.test(code)}
+              helperText="Code must be a number with a maximum of 4 digits."
             />
-            <FormControl fullWidth margin="normal" required>
-              <InputLabel id="account-type-label">Account Type</InputLabel>
-              <Select
-                labelId="account-type-label"
-                value={accountType}
-                onChange={(e) => setAccountType(e.target.value)}
-                label="Account Type"
-              >
-                {accountTypes.map((option) => (
-                  <MenuItem key={option.value} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
             {error && <p style={{ color: 'red' }}>{error}</p>}
             <DialogActions>
               <Button type="submit" variant="contained" color="primary">

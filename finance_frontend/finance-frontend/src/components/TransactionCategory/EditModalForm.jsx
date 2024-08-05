@@ -2,58 +2,53 @@ import React, { useState, useEffect } from 'react';
 import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, CircularProgress, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
 import axiosInstance from '../../axiosConfig'; // Adjust the path as needed
 
-const accountTypes = [
-  { value: 3, label: "Business Account" },
-  { value: 2, label: "Saving Account" },
-  { value: 1, label: "Main Account" },
-];
 
-const EditModalForm = ({ open, handleClose, selectedBankAccount, onReloadData,isEdit }) => {
+const EditModalForm = ({ open, handleClose, selectedCategory, onReloadData,isEdit }) => {
   const [description, setDescription] = useState('');
-  const [accountCode, setAccountCode] = useState('');
-  const [accountType, setAccountType] = useState('');
+  const [Code, setCode] = useState('');
+  const [Type, setType] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (isEdit && selectedBankAccount) {
-      setDescription(selectedBankAccount.description || '');
-      setAccountCode(selectedBankAccount.account_code || '');
-      setAccountType(selectedBankAccount.account_type || '');
+    if (isEdit && selectedCategory) {
+      setDescription(selectedCategory.description || '');
+      setCode(selectedCategory.code || '');
+      setType(selectedCategory.type || '');
     }
     else{
       setDescription('');
-      setAccountCode('');
-      setAccountType('');
+      setCode('');
+      setType('');
     }
 
-  }, [selectedBankAccount]);
+  }, [selectedCategory]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
     try {
         if (isEdit) {
-            await axiosInstance.put(`bank-account/${selectedBankAccount.id}/`, {
+            await axiosInstance.put(`transaction-type/${selectedCategory.id}/`, {
               description,
-              account_code: accountCode,
-              account_type: accountType,
+              code: Code,
+              type: Type,
             });
           } else {
-            await axiosInstance.post(`bank-account/`, {
+            await axiosInstance.post(`transaction-type/`, {
               description,
-              account_code: accountCode,
-              account_type: accountType,
+              code: Code,
+              type: Type,
             });
           }
         onReloadData();
         handleClose(); // Close modal on success
         setDescription('');
-        setAccountCode('');
-        setAccountType('');
+        setCode('');
+        setType('');
     } catch (error) {
-        setError(isEdit ? 'Failed to update bank account.' : 'Failed to create bank account.');
-        console.error('Error saving bank account:', error);
+        setError(isEdit ? 'Failed to update Category.' : 'Failed to create Category.');
+        console.error('Error saving Category', error);
     } finally {
       setLoading(false);
     }
@@ -61,7 +56,7 @@ const EditModalForm = ({ open, handleClose, selectedBankAccount, onReloadData,is
 
   return (
     <Dialog open={open} onClose={handleClose}>
-      <DialogTitle>Bank Account Information</DialogTitle>
+      <DialogTitle>Category Information</DialogTitle>
       <DialogContent>
         {loading ? (
           <CircularProgress />
@@ -76,28 +71,28 @@ const EditModalForm = ({ open, handleClose, selectedBankAccount, onReloadData,is
               required
             />
             <TextField
-              label="Account Code"
+              label="Code"
+              variant="outlined"
               fullWidth
               margin="normal"
-              value={accountCode}
-              onChange={(e) => setAccountCode(e.target.value)}
+              value={Code}
+              onChange={(e) => setCode(e.target.value)}
               required
+              inputProps={{ pattern: "\\d{1,4}" }}
+              error={!/^\d{1,4}$/.test(Code)}
+              helperText="Code must be a number with a maximum of 4 digits."
             />
             <FormControl fullWidth margin="normal" required>
-              <InputLabel id="account-type-label">Account Type</InputLabel>
-              <Select
-                labelId="account-type-label"
-                value={accountType}
-                onChange={(e) => setAccountType(e.target.value)}
-                label="Account Type"
-              >
-                {accountTypes.map((option) => (
-                  <MenuItem key={option.value} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+                <InputLabel>Type of Transaction</InputLabel>
+                <Select
+                  value={Type}
+                  onChange={(e) => setType(e.target.value)}
+                  label="Type of Transaction"
+                >
+                  <MenuItem value={1}>Credit</MenuItem>
+                  <MenuItem value={2}>Debit</MenuItem>
+                </Select>
+              </FormControl>
             {error && <p style={{ color: 'red' }}>{error}</p>}
             <DialogActions>
               <Button type="submit" variant="contained" color="primary">

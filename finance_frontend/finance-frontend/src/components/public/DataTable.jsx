@@ -4,7 +4,7 @@ import axiosInstance from '../../axiosConfig'; // Asegúrate de que la ruta sea 
 import { IconButton, Box, Typography, useTheme } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-
+import { ToastContainer, toast } from 'react-toastify';
 // Componente para los botones de acción
 const ActionButtons = ({ id, onEdit, onDelete }) => (
   <div style={{ display: 'flex', justifyContent: 'center' }}>
@@ -17,7 +17,7 @@ const ActionButtons = ({ id, onEdit, onDelete }) => (
   </div>
 );
 
-const DataTable = ({ endpoint, columns, title, onEdit, reloadData, onReloadData }) => {
+const DataTable = ({ endpoint, columns, title, onEdit, reloadData, onReloadData,handleDelete }) => {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const theme = useTheme();
@@ -26,6 +26,16 @@ const DataTable = ({ endpoint, columns, title, onEdit, reloadData, onReloadData 
       const response = await axiosInstance.get(endpoint);
       console.log('API Response:', response.data);
       setRows(response.data);
+      toast.success('Data retrieved successfully!', {
+        position: "top-right",
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -39,12 +49,6 @@ const DataTable = ({ endpoint, columns, title, onEdit, reloadData, onReloadData 
       onReloadData()
     }
   }, [endpoint,reloadData]);
-
-  // Funciones para manejar las acciones
-  const handleDelete = (id) => {
-    console.log('Delete', id);
-    // Implementa la lógica de eliminación aquí
-  };
   onEdit
   // Agrega la columna de acciones a las columnas
   const actionColumn = {
@@ -64,6 +68,7 @@ const DataTable = ({ endpoint, columns, title, onEdit, reloadData, onReloadData 
   return (
     <Box sx={{ width: '100%', p: 2, '& .table-header': { backgroundColor: theme.palette.primary.main, color: 'white' } }}>
       {/* Encabezado */}
+      <ToastContainer/>
       <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
         <Typography variant="h6" component="h2">
           {title}
